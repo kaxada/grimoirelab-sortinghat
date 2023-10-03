@@ -46,7 +46,7 @@ class TestMergeDateRanges(unittest.TestCase):
         dates = [(datetime.datetime(1900, 1, 1), datetime.datetime(2010, 1, 1)),
                  (datetime.datetime(2008, 1, 1), datetime.datetime(2100, 1, 1))]
 
-        ranges = [r for r in merge_date_ranges(dates)]
+        ranges = list(merge_date_ranges(dates))
         self.assertEqual(len(ranges), 1)
         self.assertEqual(ranges[0], (datetime.datetime(2008, 1, 1), datetime.datetime(2010, 1, 1)))
 
@@ -55,7 +55,7 @@ class TestMergeDateRanges(unittest.TestCase):
                  (datetime.datetime(2010, 1, 2), datetime.datetime(2100, 1, 1)),
                  (datetime.datetime(2008, 1, 1), datetime.datetime(2010, 1, 1))]
 
-        ranges = [r for r in merge_date_ranges(dates)]
+        ranges = list(merge_date_ranges(dates))
         self.assertEqual(len(ranges), 2)
         self.assertEqual(ranges[0], (datetime.datetime(2008, 1, 1), datetime.datetime(2010, 1, 1)))
         self.assertEqual(ranges[1], (datetime.datetime(2010, 1, 2), datetime.datetime(2100, 1, 1)))
@@ -64,7 +64,7 @@ class TestMergeDateRanges(unittest.TestCase):
         dates = [(datetime.datetime(1900, 1, 1), datetime.datetime(2010, 1, 1)),
                  (datetime.datetime(2010, 1, 2), datetime.datetime(2100, 1, 1))]
 
-        ranges = [r for r in merge_date_ranges(dates)]
+        ranges = list(merge_date_ranges(dates))
         self.assertEqual(len(ranges), 2)
         self.assertEqual(ranges[0], (datetime.datetime(1900, 1, 1), datetime.datetime(2010, 1, 1)))
         self.assertEqual(ranges[1], (datetime.datetime(2010, 1, 2), datetime.datetime(2100, 1, 1)))
@@ -74,14 +74,14 @@ class TestMergeDateRanges(unittest.TestCase):
                  (datetime.datetime(2005, 10, 15), datetime.datetime(2010, 1, 1)),
                  (datetime.datetime(2008, 1, 5), datetime.datetime(2009, 1, 1))]
 
-        ranges = [r for r in merge_date_ranges(dates)]
+        ranges = list(merge_date_ranges(dates))
         self.assertEqual(len(ranges), 1)
         self.assertEqual(ranges[0], (datetime.datetime(2005, 1, 1), datetime.datetime(2010, 1, 1)))
 
         # Case 5
         dates = [(datetime.datetime(1900, 1, 1), datetime.datetime(2100, 1, 1))]
 
-        ranges = [r for r in merge_date_ranges(dates)]
+        ranges = list(merge_date_ranges(dates))
         self.assertEqual(len(ranges), 1)
         self.assertEqual(ranges[0], (datetime.datetime(1900, 1, 1), datetime.datetime(2100, 1, 1)))
 
@@ -89,21 +89,21 @@ class TestMergeDateRanges(unittest.TestCase):
         dates = [(datetime.datetime(1900, 1, 1), datetime.datetime(2100, 1, 1)),
                  (datetime.datetime(1900, 1, 1), datetime.datetime(2100, 1, 1))]
 
-        ranges = [r for r in merge_date_ranges(dates)]
+        ranges = list(merge_date_ranges(dates))
         self.assertEqual(len(ranges), 1)
         self.assertEqual(ranges[0], (datetime.datetime(1900, 1, 1), datetime.datetime(2100, 1, 1)))
 
         # Case 7
         dates = [(datetime.datetime(1900, 1, 1), datetime.datetime(2005, 1, 1))]
 
-        ranges = [r for r in merge_date_ranges(dates)]
+        ranges = list(merge_date_ranges(dates))
         self.assertEqual(len(ranges), 1)
         self.assertEqual(ranges[0], (datetime.datetime(1900, 1, 1), datetime.datetime(2005, 1, 1)))
 
         # Case 8
         dates = [(datetime.datetime(2005, 1, 1), datetime.datetime(2100, 1, 1))]
 
-        ranges = [r for r in merge_date_ranges(dates)]
+        ranges = list(merge_date_ranges(dates))
         self.assertEqual(len(ranges), 1)
         self.assertEqual(ranges[0], (datetime.datetime(2005, 1, 1), datetime.datetime(2100, 1, 1)))
 
@@ -111,7 +111,7 @@ class TestMergeDateRanges(unittest.TestCase):
         dates = [(datetime.datetime(2000, 1, 1), datetime.datetime(2100, 1, 1)),
                  (datetime.datetime(1900, 1, 1), datetime.datetime(2100, 1, 1))]
 
-        ranges = [r for r in merge_date_ranges(dates)]
+        ranges = list(merge_date_ranges(dates))
         self.assertEqual(len(ranges), 1)
         self.assertEqual(ranges[0], (datetime.datetime(2000, 1, 1), datetime.datetime(2100, 1, 1)))
 
@@ -120,7 +120,7 @@ class TestMergeDateRanges(unittest.TestCase):
                  (datetime.datetime(1999, 1, 1), datetime.datetime(2000, 1, 1)),
                  (datetime.datetime(1900, 1, 1), datetime.datetime(2100, 1, 1))]
 
-        ranges = [r for r in merge_date_ranges(dates)]
+        ranges = list(merge_date_ranges(dates))
         self.assertEqual(len(ranges), 2)
         self.assertEqual(ranges[0], (datetime.datetime(1999, 1, 1), datetime.datetime(2000, 1, 1)))
         self.assertEqual(ranges[1], (datetime.datetime(2006, 1, 1), datetime.datetime(2008, 1, 1)))
@@ -129,7 +129,7 @@ class TestMergeDateRanges(unittest.TestCase):
         dates = [(datetime.datetime(2009, 1, 1), datetime.datetime(2010, 1, 1)),
                  (datetime.datetime(2010, 1, 1), datetime.datetime(2100, 1, 1))]
 
-        ranges = [r for r in merge_date_ranges(dates)]
+        ranges = list(merge_date_ranges(dates))
         self.assertEqual(len(ranges), 2)
         self.assertEqual(ranges[0], (datetime.datetime(2009, 1, 1), datetime.datetime(2010, 1, 1)))
         self.assertEqual(ranges[1], (datetime.datetime(2010, 1, 1), datetime.datetime(2100, 1, 1)))
@@ -143,7 +143,7 @@ class TestMergeDateRanges(unittest.TestCase):
                  (datetime.datetime(2011, 1, 1), datetime.datetime(2022, 1, 1)),
                  (datetime.datetime(2022, 1, 1), datetime.datetime(2100, 1, 1))]
 
-        ranges = [r for r in merge_date_ranges(dates)]
+        ranges = list(merge_date_ranges(dates))
         self.assertEqual(len(ranges), 5)
         self.assertEqual(ranges[0], (datetime.datetime(2009, 1, 1), datetime.datetime(2009, 1, 1)))
         self.assertEqual(ranges[1], (datetime.datetime(2009, 1, 1), datetime.datetime(2010, 1, 1)))
@@ -159,31 +159,31 @@ class TestMergeDateRanges(unittest.TestCase):
                  (datetime.datetime(1800, 1, 1), datetime.datetime(2010, 1, 1))]
 
         with self.assertRaisesRegexp(ValueError,
-                                     DATE_OUT_OF_BOUNDS_ERROR
-                                     % {'type': 'start date',
-                                        'date': '1800-01-01 00:00:00'}):
-            [r for r in merge_date_ranges(dates)]
+                                         DATE_OUT_OF_BOUNDS_ERROR
+                                         % {'type': 'start date',
+                                            'date': '1800-01-01 00:00:00'}):
+            list(merge_date_ranges(dates))
 
         # Case 2
         dates = [(datetime.datetime(2008, 1, 1), datetime.datetime(2100, 2, 1)),
                  (datetime.datetime(1900, 1, 1), datetime.datetime(2010, 1, 1))]
 
         with self.assertRaisesRegexp(ValueError,
-                                     DATE_OUT_OF_BOUNDS_ERROR
-                                     % {'type': 'end date',
-                                        'date': '2100-02-01 00:00:00'}):
-            [r for r in merge_date_ranges(dates)]
+                                         DATE_OUT_OF_BOUNDS_ERROR
+                                         % {'type': 'end date',
+                                            'date': '2100-02-01 00:00:00'}):
+            list(merge_date_ranges(dates))
 
     def test_none_list_of_dates(self):
         """Check if the result is empty when the list of ranges is None"""
 
-        ranges = [r for r in merge_date_ranges(None)]
+        ranges = list(merge_date_ranges(None))
         self.assertEqual(ranges, [])
 
     def test_empty_list_of_dates(self):
         """Check if the result is empty when the list of ranges is empty"""
 
-        ranges = [r for r in merge_date_ranges([])]
+        ranges = list(merge_date_ranges([]))
         self.assertEqual(ranges, [])
 
 

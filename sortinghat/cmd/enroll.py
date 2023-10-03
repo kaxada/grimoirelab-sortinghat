@@ -148,7 +148,7 @@ class Enroll(Command):
                     'to_dt': str(to_date)
                 }
                 msg = "enrollment for '%(uuid)s' at '%(org)s' (from: %(from_dt)s, to: %(to_dt)s) already exists in the registry"
-                msg = msg % msg_data
+                msg %= msg_data
                 self.error(msg)
                 code = e.code
 

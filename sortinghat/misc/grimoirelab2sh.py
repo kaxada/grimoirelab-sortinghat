@@ -159,8 +159,7 @@ def json_encoder(obj):
 
 
 def read_file(f):
-    content = f.read()
-    return content
+    return f.read()
 
 
 if __name__ == '__main__':

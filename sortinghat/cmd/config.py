@@ -111,10 +111,10 @@ class Config(Command):
             raise RuntimeError("Configuration file not given")
 
         if not self.__check_config_key(key):
-            raise RuntimeError("%s parameter does not exists" % key)
+            raise RuntimeError(f"{key} parameter does not exists")
 
         if not os.path.isfile(filepath):
-            raise RuntimeError("%s config file does not exist" % filepath)
+            raise RuntimeError(f"{filepath} config file does not exist")
 
         section, option = key.split('.')
 
@@ -144,7 +144,7 @@ class Config(Command):
             raise RuntimeError("Configuration file not given")
 
         if not self.__check_config_key(key):
-            raise RuntimeError("%s parameter does not exists or cannot be set" % key)
+            raise RuntimeError(f"{key} parameter does not exists or cannot be set")
 
         config = configparser.SafeConfigParser()
 

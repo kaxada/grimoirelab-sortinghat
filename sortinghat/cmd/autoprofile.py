@@ -73,9 +73,7 @@ class AutoProfile(Command):
 
         params = self.parser.parse_args(args)
         sources = params.source
-        code = self.autocomplete(sources)
-
-        return code
+        return self.autocomplete(sources)
 
     def autocomplete(self, sources):
         """Autocomplete unique identities profiles.

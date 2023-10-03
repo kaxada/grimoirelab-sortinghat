@@ -147,10 +147,7 @@ class EmailNameMatcher(IdentityMatcher):
             return True
 
         # No match yet, so compare names
-        if fa.name and fa.name == fb.name:
-            return True
-
-        return False
+        return bool(fa.name and fa.name == fb.name)
 
     def filter(self, u):
         """Filter the valid identities for this matcher.
@@ -202,16 +199,12 @@ class EmailNameMatcher(IdentityMatcher):
         return ['email', 'name']
 
     def _check_pattern(self, pattern, value):
-        if not value:
-            return False
-        return pattern.match(value) is not None
+        return False if not value else pattern.match(value) is not None
 
     def _check_blacklist(self, id_):
         if self._check_value_in_blacklist(id_.email):
             return True
-        if self._check_value_in_blacklist(id_.name):
-            return True
-        return False
+        return bool(self._check_value_in_blacklist(id_.name))
 
     def _check_value_in_blacklist(self, value):
         return value and value.lower() in self.blacklist

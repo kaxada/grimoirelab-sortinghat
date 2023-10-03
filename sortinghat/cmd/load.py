@@ -112,8 +112,7 @@ class Load(Command):
 
     @property
     def usage(self):
-        usg = "%(prog)s load"
-        usg += " [-v] [--reset] [--identities | --orgs]"
+        usg = "%(prog)s load" + " [-v] [--reset] [--identities | --orgs]"
         usg += " [-m matching] [-n] [--no-strict-matching] [--overwrite] [file]"
         return usg
 
@@ -186,7 +185,7 @@ class Load(Command):
             except ValueError as e:
                 raise RuntimeError(str(e))
             except AlreadyExistsError as e:
-                msg = "%s. Not added." % str(e)
+                msg = f"{str(e)}. Not added."
                 self.warning(msg)
 
         self.log("%d/%d blacklist entries loaded" % (n, len(blacklist)))
@@ -223,7 +222,7 @@ class Load(Command):
                 except (ValueError, NotFoundError) as e:
                     raise RuntimeError(str(e))
                 except AlreadyExistsError as e:
-                    msg = "%s. Not updated." % str(e)
+                    msg = f"{str(e)}. Not updated."
                     self.warning(msg)
 
     def import_identities(self, parser, matching=None, match_new=False,
@@ -290,12 +289,12 @@ class Load(Command):
 
         for uidentity in uidentities:
             self.log("\n=====", verbose)
-            self.log("+ Processing %s" % uidentity.uuid, verbose)
+            self.log(f"+ Processing {uidentity.uuid}", verbose)
 
             try:
                 stored_uuid = self.__load_unique_identity(uidentity, verbose)
             except LoadError as e:
-                self.error("%s Skipping." % str(e))
+                self.error(f"{str(e)} Skipping.")
                 self.log("=====", verbose)
                 continue
 
@@ -305,8 +304,7 @@ class Load(Command):
             try:
                 self.__load_profile(uidentity.profile, stored_uuid, verbose)
             except Exception as e:
-                self.error("%s. Loading %s profile. Skipping profile." %
-                           (str(e), stored_uuid))
+                self.error(f"{str(e)}. Loading {stored_uuid} profile. Skipping profile.")
 
             self.__load_enrollments(uidentity.enrollments, stored_uuid,
                                     verbose)
@@ -315,8 +313,7 @@ class Load(Command):
                 stored_uuid = self._merge_on_matching(stored_uuid, matcher,
                                                       verbose)
 
-            self.log("+ %s (old %s) loaded" % (stored_uuid, uidentity.uuid),
-                     verbose)
+            self.log(f"+ {stored_uuid} (old {uidentity.uuid}) loaded", verbose)
             self.log("=====", verbose)
             n += 1
 
@@ -337,7 +334,7 @@ class Load(Command):
                 api.move_identity(self.db, identity.id, identity.id)
                 nids += 1
 
-        self.log("Relationships cleared for %s identities" % nids)
+        self.log(f"Relationships cleared for {nids} identities")
 
         self.log("Clearing enrollments")
 
@@ -357,16 +354,15 @@ class Load(Command):
         if uuid:
             try:
                 api.unique_identities(self.db, uuid)
-                self.log("-- %s already exists." % uuid, verbose)
+                self.log(f"-- {uuid} already exists.", verbose)
                 return uuid
             except NotFoundError as e:
-                self.log("-- %s not found. Generating a new UUID." % uuid,
-                         debug=verbose)
+                self.log(f"-- {uuid} not found. Generating a new UUID.", debug=verbose)
 
         # We don't have a unique identity, so we have to create
         # a new one.
         if len(uidentity.identities) == 0:
-            msg = "not enough info to load %s unique identity." % uidentity.uuid
+            msg = f"not enough info to load {uidentity.uuid} unique identity."
             raise LoadError(cause=msg)
 
         identity = uidentity.identities.pop(0)
@@ -381,11 +377,11 @@ class Load(Command):
             with self.db.connect() as session:
                 stored_identity = find_identity(session, e.eid)
                 stored_uuid = stored_identity.uuid
-            self.warning("-- " + str(e), debug=verbose)
+            self.warning(f"-- {str(e)}", debug=verbose)
         except ValueError as e:
             raise LoadError(cause=str(e))
 
-        self.log("-- using %s for %s unique identity." % (stored_uuid, uuid), verbose)
+        self.log(f"-- using {stored_uuid} for {uuid} unique identity.", verbose)
 
         return stored_uuid
 
@@ -407,7 +403,7 @@ class Load(Command):
                     stored_uuid = stored_identity.uuid
 
                 if uuid != stored_uuid:
-                    msg = "%s is already assigned to %s. Merging." % (uuid, stored_uuid)
+                    msg = f"{uuid} is already assigned to {stored_uuid}. Merging."
                     self.warning(msg, verbose)
 
                     api.merge_unique_identities(self.db, uuid, stored_uuid)
@@ -437,7 +433,7 @@ class Load(Command):
         elif is_empty_profile(uid.profile):
             self.__create_profile_from_identities(uid.identities, uuid, verbose)
         else:
-            self.log("-- empty profile given for %s. Not updated" % uuid, verbose)
+            self.log(f"-- empty profile given for {uuid}. Not updated", verbose)
 
     def __create_profile(self, profile, uuid, verbose):
         """Create profile information from a profile object"""
@@ -452,7 +448,7 @@ class Load(Command):
 
         api.edit_profile(self.db, uuid, **kw)
 
-        self.log("-- profile %s updated" % uuid, verbose)
+        self.log(f"-- profile {uuid} updated", verbose)
 
     def __create_profile_from_identities(self, identities, uuid, verbose):
         """Create a profile using the data from the identities"""
@@ -468,15 +464,11 @@ class Load(Command):
 
         for identity in identities:
             if not name and identity.name:
-                m = re.match(NAME_REGEX, identity.name)
-
-                if m:
+                if m := re.match(NAME_REGEX, identity.name):
                     name = identity.name
 
             if not email and identity.email:
-                m = re.match(EMAIL_ADDRESS_REGEX, identity.email)
-
-                if m:
+                if m := re.match(EMAIL_ADDRESS_REGEX, identity.email):
                     email = identity.email
 
             if not username:
@@ -499,7 +491,7 @@ class Load(Command):
 
         api.edit_profile(self.db, uuid, **kw)
 
-        self.log("-- profile %s updated" % uuid, verbose)
+        self.log(f"-- profile {uuid} updated", verbose)
 
     def __load_enrollments(self, enrollments, uuid, verbose):
         """Store enrollments"""
@@ -514,7 +506,7 @@ class Load(Command):
             try:
                 api.add_organization(self.db, organization)
             except AlreadyExistsError as e:
-                msg = "%s. Organization not updated." % str(e)
+                msg = f"{str(e)}. Organization not updated."
                 self.warning(msg, verbose)
 
             if organization not in organizations:
@@ -524,14 +516,14 @@ class Load(Command):
             to_date = min(MAX_PERIOD_DATE, enrollment.end)
 
             if from_date != enrollment.start or to_date != enrollment.end:
-                msg = "Dates out of bound. Set to %s and %s." % (str(from_date), str(to_date))
+                msg = f"Dates out of bound. Set to {str(from_date)} and {str(to_date)}."
                 self.warning(msg, verbose)
 
             try:
                 api.add_enrollment(self.db, uuid, enrollment.organization.name,
                                    from_date, to_date)
             except AlreadyExistsError as e:
-                msg = "%s. Enrollment not updated." % str(e)
+                msg = f"{str(e)}. Enrollment not updated."
                 self.warning(msg, verbose)
             except (ValueError, NotFoundError) as e:
                 raise LoadError(cause=str(e))
@@ -578,5 +570,4 @@ class Load(Command):
     def __read_file(self, infile):
         """Read a file into a str object"""
 
-        content = infile.read()
-        return content
+        return infile.read()

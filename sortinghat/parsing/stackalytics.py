@@ -67,13 +67,13 @@ class StackalyticsParser(object):
 
     @property
     def identities(self):
-        uids = [u for u in self._identities.values()]
+        uids = list(self._identities.values())
         uids.sort(key=lambda u: u.uuid)
         return uids
 
     @property
     def organizations(self):
-        orgs = [o for o in self._organizations.values()]
+        orgs = list(self._organizations.values())
         orgs.sort(key=lambda o: o.name)
         return orgs
 
@@ -124,7 +124,7 @@ class StackalyticsParser(object):
                     dom = Domain(domain=domain)
                     org.domains.append(dom)
         except KeyError as e:
-            msg = "invalid json format. Attribute %s not found" % e.args
+            msg = f"invalid json format. Attribute {e.args} not found"
             raise InvalidFormatError(cause=msg)
 
     def __parse_identities(self, json):
@@ -193,7 +193,7 @@ class StackalyticsParser(object):
                         continue
 
                     username = self.__encode(username)
-                    source = self.source + ':' + site_id.replace('_id', '')
+                    source = f'{self.source}:' + site_id.replace('_id', '')
                     identity = Identity(name=name, email=None, username=username,
                                         source=source, uuid=uuid)
                     uid.identities.append(identity)
@@ -203,7 +203,7 @@ class StackalyticsParser(object):
 
                 self._identities[uuid] = uid
         except KeyError as e:
-            msg = "invalid json format. Attribute %s not found" % e.args
+            msg = f"invalid json format. Attribute {e.args} not found"
             raise InvalidFormatError(cause=msg)
 
     def __parse_enrollments(self, user):
@@ -240,7 +240,7 @@ class StackalyticsParser(object):
         try:
             return json.loads(stream)
         except ValueError as e:
-            cause = "invalid json format. %s" % str(e)
+            cause = f"invalid json format. {str(e)}"
         raise InvalidFormatError(cause=cause)
 
     def __encode(self, s):

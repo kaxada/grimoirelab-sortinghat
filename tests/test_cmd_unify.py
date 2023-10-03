@@ -215,9 +215,9 @@ class TestUnifyCommand(TestUnifyCaseBase):
 
             with open(self.recovery_path, 'r') as f:
                 count_objs = 0
-                for line in f.readlines():
+                for line in f:
                     matches_obj = json.loads(line.strip("\n"))
-                    self.assertTrue(all([isinstance(m, str) for m in matches_obj['identities']]))
+                    self.assertTrue(all(isinstance(m, str) for m in matches_obj['identities']))
                     self.assertFalse(matches_obj['processed'])
                     count_objs += 1
 
@@ -388,9 +388,9 @@ class TestUnify(TestUnifyCaseBase):
 
             with open(self.recovery_path, 'r') as f:
                 count_objs = 0
-                for line in f.readlines():
+                for line in f:
                     matches_obj = json.loads(line.strip("\n"))
-                    self.assertTrue(all([isinstance(m, str) for m in matches_obj['identities']]))
+                    self.assertTrue(all(isinstance(m, str) for m in matches_obj['identities']))
                     self.assertFalse(matches_obj['processed'])
                     count_objs += 1
 

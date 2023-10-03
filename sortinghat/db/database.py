@@ -236,14 +236,9 @@ def reflect_table(engine, klass):
     except OperationalError as e:
         raise DatabaseError(error=e.orig.args[1], code=e.orig.args[0])
 
-    # Try to reflect from any of the supported tables
-    table = None
-
-    for tb in klass.tables():
-        if tb in meta.tables:
-            table = meta.tables[tb]
-            break
-
+    table = next(
+        (meta.tables[tb] for tb in klass.tables() if tb in meta.tables), None
+    )
     if table is None:
         raise DatabaseError(error="Invalid schema. Table not found",
                             code="-1")
@@ -258,7 +253,11 @@ def reflect_table(engine, klass):
 def find_model_by_table_name(name):
     """Find a model reference by its table name"""
 
-    for model in ModelBase._decl_class_registry.values():
-        if hasattr(model, '__table__') and model.__table__.fullname == name:
-            return model
-    return None
+    return next(
+        (
+            model
+            for model in ModelBase._decl_class_registry.values()
+            if hasattr(model, '__table__') and model.__table__.fullname == name
+        ),
+        None,
+    )

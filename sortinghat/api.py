@@ -201,12 +201,11 @@ def add_domain(db, organization, domain, is_top_domain=False, overwrite=False):
         if not org:
             raise NotFoundError(entity=organization)
 
-        dom = find_domain(session, domain)
-
-        if dom and not overwrite:
-            raise AlreadyExistsError(entity='Domain', eid=dom.domain)
-        elif dom:
-            delete_domain_db(session, dom)
+        if dom := find_domain(session, domain):
+            if not overwrite:
+                raise AlreadyExistsError(entity='Domain', eid=dom.domain)
+            else:
+                delete_domain_db(session, dom)
 
         try:
             add_domain_db(session, org, domain,
@@ -355,12 +354,10 @@ def delete_unique_identity(db, uuid):
         in the registry.
     """
     with db.connect() as session:
-        uidentity = find_unique_identity(session, uuid)
-
-        if not uidentity:
+        if uidentity := find_unique_identity(session, uuid):
+            delete_unique_identity_db(session, uidentity)
+        else:
             raise NotFoundError(entity=uuid)
-
-        delete_unique_identity_db(session, uidentity)
 
 
 def delete_identity(db, identity_id):
@@ -381,12 +378,10 @@ def delete_identity(db, identity_id):
         registry.
     """
     with db.connect() as session:
-        identity = find_identity(session, identity_id)
-
-        if not identity:
+        if identity := find_identity(session, identity_id):
+            delete_identity_db(session, identity)
+        else:
             raise NotFoundError(entity=identity_id)
-
-        delete_identity_db(session, identity)
 
 
 def delete_organization(db, organization):
@@ -405,12 +400,10 @@ def delete_organization(db, organization):
         in the registry.
     """
     with db.connect() as session:
-        org = find_organization(session, organization)
-
-        if not org:
+        if org := find_organization(session, organization):
+            delete_organization_db(session, org)
+        else:
             raise NotFoundError(entity=organization)
-
-        delete_organization_db(session, org)
 
 
 def delete_domain(db, organization, domain):
@@ -433,14 +426,15 @@ def delete_domain(db, organization, domain):
         if not org:
             raise NotFoundError(entity=organization)
 
-        dom = session.query(Domain).join(Organization).\
-            filter(Organization.name == organization,
-                   Domain.domain == domain).first()
-
-        if not dom:
+        if (
+            dom := session.query(Domain)
+            .join(Organization)
+            .filter(Organization.name == organization, Domain.domain == domain)
+            .first()
+        ):
+            delete_domain_db(session, dom)
+        else:
             raise NotFoundError(entity=domain)
-
-        delete_domain_db(session, dom)
 
 
 def delete_enrollment(db, uuid, organization, from_date=None, to_date=None):
@@ -521,13 +515,14 @@ def delete_from_matching_blacklist(db, entity):
         in the registry.
     """
     with db.connect() as session:
-        mb = session.query(MatchingBlacklist).\
-            filter(MatchingBlacklist.excluded == entity).first()
-
-        if not mb:
+        if (
+            mb := session.query(MatchingBlacklist)
+            .filter(MatchingBlacklist.excluded == entity)
+            .first()
+        ):
+            delete_from_matching_blacklist_db(session, mb)
+        else:
             raise NotFoundError(entity=entity)
-
-        delete_from_matching_blacklist_db(session, mb)
 
 
 def merge_unique_identities(db, from_uuid, to_uuid):
@@ -775,11 +770,11 @@ def match_identities(db, uuid, matcher):
             filter(UniqueIdentity.uuid != uuid).\
             order_by(UniqueIdentity.uuid)
 
-        for candidate in candidates:
-            if not matcher.match(uidentity, candidate):
-                continue
-            uidentities.append(candidate)
-
+        uidentities.extend(
+            candidate
+            for candidate in candidates
+            if matcher.match(uidentity, candidate)
+        )
         # Detach objects from the session
         session.expunge_all()
 
@@ -816,13 +811,11 @@ def unique_identities(db, uuid=None, source=None):
                        Identity.source == source)
 
         if uuid:
-            uidentity = query.\
-                filter(UniqueIdentity.uuid == uuid).first()
-
-            if not uidentity:
+            if uidentity := query.filter(UniqueIdentity.uuid == uuid).first():
+                uidentities = [uidentity]
+            else:
                 raise NotFoundError(entity=uuid)
 
-            uidentities = [uidentity]
         else:
             uidentities = query.\
                 order_by(UniqueIdentity.uuid).all()
@@ -849,7 +842,7 @@ def search_unique_identities(db, term, source=None):
         any unique identity from the registry
     """
     uidentities = []
-    pattern = '%' + term + '%' if term else None
+    pattern = f'%{term}%' if term else None
 
     with db.connect() as session:
         query = session.query(UniqueIdentity).\
@@ -902,14 +895,12 @@ def search_unique_identities_slice(db, term, offset, limit):
         `offset` or `limit` is lower than zero
     """
     uidentities = []
-    pattern = '%' + term + '%' if term else None
+    pattern = f'%{term}%' if term else None
 
     if offset < 0:
-        raise InvalidValueError('offset must be greater than 0 - %s given'
-                                % str(offset))
+        raise InvalidValueError(f'offset must be greater than 0 - {str(offset)} given')
     if limit < 0:
-        raise InvalidValueError('limit must be greater than 0 - %s given'
-                                % str(limit))
+        raise InvalidValueError(f'limit must be greater than 0 - {str(limit)} given')
 
     with db.connect() as session:
         query = session.query(UniqueIdentity).\
@@ -1029,9 +1020,12 @@ def registry(db, term=None):
 
     with db.connect() as session:
         if term:
-            orgs = session.query(Organization).\
-                filter(Organization.name.like('%' + term + '%')).\
-                order_by(Organization.name).all()
+            orgs = (
+                session.query(Organization)
+                .filter(Organization.name.like(f'%{term}%'))
+                .order_by(Organization.name)
+                .all()
+            )
 
             if not orgs:
                 raise NotFoundError(entity=term)
@@ -1070,29 +1064,26 @@ def domains(db, domain=None, top=False):
 
     with db.connect() as session:
         if domain:
-            dom = find_domain(session, domain)
-
-            if not dom:
+            if dom := find_domain(session, domain):
+                doms = [dom]
+            else:
                 if not top:
                     raise NotFoundError(entity=domain)
-                else:
                     # Adds a dot to the beggining of the domain.
                     # Useful to compare domains like example.com and
                     # myexample.com
-                    add_dot = lambda d: '.' + d if not d.startswith('.') else d
+                add_dot = lambda d: f'.{d}' if not d.startswith('.') else d
 
-                    d = add_dot(domain)
+                d = add_dot(domain)
 
-                    tops = session.query(Domain).\
-                        filter(Domain.is_top_domain).order_by(Domain.domain).all()
+                tops = session.query(Domain).\
+                    filter(Domain.is_top_domain).order_by(Domain.domain).all()
 
-                    doms = [t for t in tops
-                            if d.endswith(add_dot(t.domain))]
+                doms = [t for t in tops
+                        if d.endswith(add_dot(t.domain))]
 
-                    if not doms:
-                        raise NotFoundError(entity=domain)
-            else:
-                doms = [dom]
+                if not doms:
+                    raise NotFoundError(entity=domain)
         else:
             query = session.query(Domain)
 
@@ -1140,8 +1131,9 @@ def countries(db, code=None, term=None):
             and code.isalpha()
 
     if code is not None and not _is_code_valid(code):
-        raise InvalidValueError('country code must be a 2 length alpha string - %s given'
-                                % str(code))
+        raise InvalidValueError(
+            f'country code must be a 2 length alpha string - {str(code)} given'
+        )
 
     cs = []
 
@@ -1152,7 +1144,7 @@ def countries(db, code=None, term=None):
             if code:
                 query = query.filter(Country.code == code.upper())
             elif term:
-                query = query.filter(Country.name.like('%' + term + '%'))
+                query = query.filter(Country.name.like(f'%{term}%'))
 
             cs = query.order_by(Country.code).all()
 
@@ -1207,13 +1199,14 @@ def enrollments(db, uuid=None, organization=None, from_date=None, to_date=None):
         to_date = MAX_PERIOD_DATE
 
     if from_date < MIN_PERIOD_DATE or from_date > MAX_PERIOD_DATE:
-        raise InvalidValueError("'from_date' %s is out of bounds" % str(from_date))
+        raise InvalidValueError(f"'from_date' {str(from_date)} is out of bounds")
     if to_date < MIN_PERIOD_DATE or to_date > MAX_PERIOD_DATE:
-        raise InvalidValueError("'to_date' %s is out of bounds" % str(to_date))
+        raise InvalidValueError(f"'to_date' {str(to_date)} is out of bounds")
 
     if from_date and to_date and from_date > to_date:
-        raise InvalidValueError("'from_date' %s cannot be greater than %s"
-                                % (from_date, to_date))
+        raise InvalidValueError(
+            f"'from_date' {from_date} cannot be greater than {to_date}"
+        )
 
     enrollments = []
 
@@ -1225,21 +1218,19 @@ def enrollments(db, uuid=None, organization=None, from_date=None, to_date=None):
 
         # Filter by uuid
         if uuid:
-            uidentity = find_unique_identity(session, uuid)
+            if uidentity := find_unique_identity(session, uuid):
+                query = query.filter(Enrollment.uidentity == uidentity)
 
-            if not uidentity:
+            else:
                 raise NotFoundError(entity=uuid)
-
-            query = query.filter(Enrollment.uidentity == uidentity)
 
         # Filter by organization
         if organization:
-            org = find_organization(session, organization)
+            if org := find_organization(session, organization):
+                query = query.filter(Enrollment.organization == org)
 
-            if not org:
+            else:
                 raise NotFoundError(entity=organization)
-
-            query = query.filter(Enrollment.organization == org)
 
         # Get the results
         enrollments = query.order_by(UniqueIdentity.uuid,
@@ -1274,9 +1265,12 @@ def blacklist(db, term=None):
 
     with db.connect() as session:
         if term:
-            mbs = session.query(MatchingBlacklist).\
-                filter(MatchingBlacklist.excluded.like('%' + term + '%')).\
-                order_by(MatchingBlacklist.excluded).all()
+            mbs = (
+                session.query(MatchingBlacklist)
+                .filter(MatchingBlacklist.excluded.like(f'%{term}%'))
+                .order_by(MatchingBlacklist.excluded)
+                .all()
+            )
 
             if not mbs:
                 raise NotFoundError(entity=term)

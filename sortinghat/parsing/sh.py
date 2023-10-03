@@ -58,18 +58,18 @@ class SortingHatParser(object):
 
     @property
     def blacklist(self):
-        bl = [b for b in self._blacklist.values()]
+        bl = list(self._blacklist.values())
         bl.sort(key=lambda b: b.excluded)
         return bl
 
     @property
     def identities(self):
         self._identities.sort(key=lambda u: u.uuid)
-        return [u for u in self._identities]
+        return list(self._identities)
 
     @property
     def organizations(self):
-        orgs = [o for o in self._organizations.values()]
+        orgs = list(self._organizations.values())
         orgs.sort(key=lambda o: o.name)
         return orgs
 
@@ -120,7 +120,7 @@ class SortingHatParser(object):
                     bl = MatchingBlacklist(excluded=excluded)
                     self._blacklist[excluded] = bl
         except KeyError as e:
-            msg = "invalid json format. Attribute %s not found" % e.args
+            msg = f"invalid json format. Attribute {e.args} not found"
             raise InvalidFormatError(cause=msg)
 
     def __parse_identities(self, json):
@@ -276,7 +276,7 @@ class SortingHatParser(object):
 
                 self._identities.append(uid)
         except KeyError as e:
-            msg = "invalid json format. Attribute %s not found" % e.args
+            msg = f"invalid json format. Attribute {e.args} not found"
             raise InvalidFormatError(cause=msg)
 
     def __parse_organizations(self, json):
@@ -329,7 +329,7 @@ class SortingHatParser(object):
                                  is_top_domain=domain['is_top'])
                     org.domains.append(dom)
         except KeyError as e:
-            msg = "invalid json format. Attribute %s not found" % e.args
+            msg = f"invalid json format. Attribute {e.args} not found"
             raise InvalidFormatError(cause=msg)
 
     def __load_json(self, stream):
@@ -340,7 +340,7 @@ class SortingHatParser(object):
         try:
             return json.loads(stream)
         except ValueError as e:
-            cause = "invalid json format. %s" % str(e)
+            cause = f"invalid json format. {str(e)}"
             raise InvalidFormatError(cause=cause)
 
     def __encode(self, s):

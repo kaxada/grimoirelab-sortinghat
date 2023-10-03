@@ -84,13 +84,13 @@ class GitdmParser(object):
 
     @property
     def identities(self):
-        uids = [u for u in self._identities.values()]
+        uids = list(self._identities.values())
         uids.sort(key=lambda u: u.uuid)
         return uids
 
     @property
     def organizations(self):
-        orgs = [o for o in self._organizations.values()]
+        orgs = list(self._organizations.values())
         orgs.sort(key=lambda o: o.name)
         return orgs
 
@@ -114,8 +114,7 @@ class GitdmParser(object):
             if not uid:
                 uid = UniqueIdentity(uuid=email)
 
-                e = re.match(self.EMAIL_ADDRESS_REGEX, email, re.UNICODE)
-                if e:
+                if e := re.match(self.EMAIL_ADDRESS_REGEX, email, re.UNICODE):
                     identity = Identity(email=email, source=self.source)
                 else:
                     identity = Identity(username=email, source=self.source)
@@ -124,8 +123,7 @@ class GitdmParser(object):
 
                 self._identities[email] = uid
 
-            e = re.match(self.EMAIL_ADDRESS_REGEX, alias, re.UNICODE)
-            if e:
+            if e := re.match(self.EMAIL_ADDRESS_REGEX, alias, re.UNICODE):
                 identity = Identity(email=alias, source=self.source)
             else:
                 identity = Identity(username=alias, source=self.source)
@@ -296,15 +294,14 @@ class GitdmParser(object):
 
             m = re.match(self.VALID_LINE_REGEX, line, re.UNICODE)
             if not m:
-                cause = "Skip: '%s' -> line %s: invalid line format" % (line, str(nline))
+                cause = f"Skip: '{line}' -> line {nline}: invalid line format"
                 logger.warning(cause)
                 continue
 
             try:
-                result = parse_line(m.group(1), m.group(2))
-                yield result
+                yield parse_line(m.group(1), m.group(2))
             except InvalidFormatError as e:
-                cause = "Skip: '%s' -> line %s: %s" % (line, str(nline), e)
+                cause = f"Skip: '{line}' -> line {nline}: {e}"
                 logger.warning(cause)
                 continue
 
@@ -321,28 +318,22 @@ class GitdmParser(object):
 
         e = re.match(self.EMAIL_ADDRESS_REGEX, raw_email, re.UNICODE)
         if not e and self.email_validation:
-            cause = "invalid email format: '%s'" % raw_email
+            cause = f"invalid email format: '{raw_email}'"
             raise InvalidFormatError(cause=cause)
 
-        if self.email_validation:
-            email = e.group('email').strip()
-        else:
-            email = raw_email
-
+        email = e.group('email').strip() if self.email_validation else raw_email
         raw_enrollment = raw_enrollment.strip() if raw_enrollment != ' ' else raw_enrollment
         r = re.match(self.ENROLLMENT_REGEX, raw_enrollment, re.UNICODE)
         if not r:
-            cause = "invalid enrollment format: '%s'" % raw_enrollment
+            cause = f"invalid enrollment format: '{raw_enrollment}'"
             raise InvalidFormatError(cause=cause)
 
         org = r.group('organization').strip()
-        date = r.group('date')
-
-        if date:
+        if date := r.group('date'):
             try:
                 dt = dateutil.parser.parse(r.group('date'))
             except Exception as e:
-                cause = "invalid date: '%s'" % date
+                cause = f"invalid date: '{date}'"
         else:
             dt = MAX_PERIOD_DATE
 
@@ -356,7 +347,7 @@ class GitdmParser(object):
 
         d = re.match(self.DOMAIN_REGEX, raw_domain, re.UNICODE)
         if not d:
-            cause = "invalid domain format: '%s'" % raw_domain
+            cause = f"invalid domain format: '{raw_domain}'"
             raise InvalidFormatError(cause=cause)
 
         dom = d.group('domain').strip()
@@ -364,7 +355,7 @@ class GitdmParser(object):
         raw_org = raw_org.strip() if raw_org != ' ' else raw_org
         o = re.match(self.ORGANIZATION_REGEX, raw_org, re.UNICODE)
         if not o:
-            cause = "invalid organization format: '%s'" % raw_org
+            cause = f"invalid organization format: '{raw_org}'"
             raise InvalidFormatError(cause=cause)
 
         org = o.group('organization').strip()

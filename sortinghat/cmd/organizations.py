@@ -117,18 +117,16 @@ class Organizations(Command):
 
         organization = params.organization
         domain = params.domain
-        is_top_domain = params.top_domain
-        overwrite = params.overwrite
-
         if params.add:
-            code = self.add(organization, domain, is_top_domain, overwrite)
+            is_top_domain = params.top_domain
+            overwrite = params.overwrite
+
+            return self.add(organization, domain, is_top_domain, overwrite)
         elif params.delete:
-            code = self.delete(organization, domain)
+            return self.delete(organization, domain)
         else:
             term = organization
-            code = self.registry(term)
-
-        return code
+            return self.registry(term)
 
     def add(self, organization, domain=None, is_top_domain=False, overwrite=False):
         """Add organizations and domains to the registry.
@@ -167,7 +165,7 @@ class Organizations(Command):
                 # because organization cannot be None or empty
                 raise RuntimeError(str(e))
             except AlreadyExistsError as e:
-                msg = "organization '%s' already exists in the registry" % organization
+                msg = f"organization '{organization}' already exists in the registry"
                 self.error(msg)
                 return e.code
         else:
@@ -179,7 +177,7 @@ class Organizations(Command):
                 # Same as above, domains cannot be None or empty
                 raise RuntimeError(str(e))
             except AlreadyExistsError as e:
-                msg = "domain '%s' already exists in the registry" % domain
+                msg = f"domain '{domain}' already exists in the registry"
                 self.error(msg)
                 return e.code
             except NotFoundError as e:

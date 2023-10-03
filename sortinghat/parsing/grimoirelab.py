@@ -84,10 +84,10 @@ class GrimoireLabParser(object):
         self.email_validation = email_validation
         self.enrollment_periods_validation = enrollment_periods_validation
 
-        if not (identities or organizations):
+        if identities or organizations:
+            self.__parse(identities, organizations)
+        else:
             raise ValueError('Null identities and organization streams')
-
-        self.__parse(identities, organizations)
 
     @property
     def blacklist(self):
@@ -97,13 +97,13 @@ class GrimoireLabParser(object):
 
     @property
     def identities(self):
-        uids = [u for u in self._identities.values()]
+        uids = list(self._identities.values())
         uids.sort(key=lambda u: u.uuid)
         return uids
 
     @property
     def organizations(self):
-        orgs = [o for o in self._organizations.values()]
+        orgs = list(self._organizations.values())
         orgs.sort(key=lambda o: o.name)
         return orgs
 
@@ -239,7 +239,7 @@ class GrimoireLabParser(object):
 
                 self._identities[uuid] = uid
         except KeyError as e:
-            error = "Attribute %s not found" % e.args
+            error = f"Attribute {e.args} not found"
             msg = self.GRIMOIRELAB_INVALID_FORMAT % {'error': error}
             raise InvalidFormatError(cause=msg)
 
@@ -281,7 +281,7 @@ class GrimoireLabParser(object):
 
                 if 'domains' in element:
                     if not isinstance(element['domains'], list):
-                        error = "List of elements expected for organization %s" % name
+                        error = f"List of elements expected for organization {name}"
                         msg = self.GRIMOIRELAB_INVALID_FORMAT % {'error': error}
                         raise InvalidFormatError(cause=msg)
                     for dom in element['domains']:
@@ -289,17 +289,17 @@ class GrimoireLabParser(object):
                             d = Domain(domain=dom, is_top_domain=False)
                             o.domains.append(d)
                         else:
-                            error = "Empty domain name for organization %s" % name
+                            error = f"Empty domain name for organization {name}"
                             msg = self.GRIMOIRELAB_INVALID_FORMAT % {'error': error}
                             raise InvalidFormatError(cause=msg)
 
                 self._organizations[name] = o
         except KeyError as e:
-            error = "Attribute %s not found" % e.args
+            error = f"Attribute {e.args} not found"
             msg = self.GRIMOIRELAB_INVALID_FORMAT % {'error': error}
             raise InvalidFormatError(cause=msg)
         except TypeError as e:
-            error = "%s" % e.args
+            error = f"{e.args}"
             msg = self.GRIMOIRELAB_INVALID_FORMAT % {'error': error}
             raise InvalidFormatError(cause=msg)
 
@@ -363,7 +363,7 @@ class GrimoireLabParser(object):
         try:
             return yaml.load(stream, Loader=yaml.SafeLoader)
         except ValueError as e:
-            cause = "invalid yml format. %s" % str(e)
+            cause = f"invalid yml format. {str(e)}"
             raise InvalidFormatError(cause=cause)
 
     def __encode(self, s):
@@ -372,13 +372,11 @@ class GrimoireLabParser(object):
     def __validate_email(self, email):
         """Checks if a string looks like an email address"""
 
-        e = re.match(self.EMAIL_ADDRESS_REGEX, email, re.UNICODE)
-        if e:
+        if e := re.match(self.EMAIL_ADDRESS_REGEX, email, re.UNICODE):
             return email
-        else:
-            error = "Invalid email address: " + str(email)
-            msg = self.GRIMOIRELAB_INVALID_FORMAT % {'error': error}
-            raise InvalidFormatError(cause=msg)
+        error = f"Invalid email address: {str(email)}"
+        msg = self.GRIMOIRELAB_INVALID_FORMAT % {'error': error}
+        raise InvalidFormatError(cause=msg)
 
     def __validate_enrollment_periods(self, enrollments):
         """Check for overlapped periods in the enrollments"""

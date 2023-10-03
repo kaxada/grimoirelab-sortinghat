@@ -64,9 +64,7 @@ class Affiliate(Command):
 
         self.parser.parse_args(args)
 
-        code = self.affiliate()
-
-        return code
+        return self.affiliate()
 
     def affiliate(self):
         """Affiliate unique identities.
@@ -98,7 +96,7 @@ class Affiliate(Command):
                         doms.sort(key=lambda d: len(d.domain), reverse=True)
 
                         msg = "multiple top domains for %s sub-domain. Domain %s selected."
-                        msg = msg % (domain, doms[0].domain)
+                        msg %= (domain, doms[0].domain)
                         self.warning(msg)
 
                     organization = doms[0].organization.name

@@ -88,14 +88,12 @@ class Blacklist(Command):
         entry = params.entry
 
         if params.add:
-            code = self.add(entry)
+            return self.add(entry)
         elif params.delete:
-            code = self.delete(entry)
+            return self.delete(entry)
         else:
             term = entry
-            code = self.blacklist(term)
-
-        return code
+            return self.blacklist(term)
 
     def add(self, entry):
         """Add entries to the blacklist.
@@ -115,7 +113,7 @@ class Blacklist(Command):
             # because entry cannot be None or empty
             raise RuntimeError(str(e))
         except AlreadyExistsError as e:
-            msg = "%s already exists in the registry" % entry
+            msg = f"{entry} already exists in the registry"
             self.error(msg)
             return e.code
 

@@ -79,9 +79,7 @@ class Remove(Command):
         identifier = params.identifier
         identity = params.identity
 
-        code = self.remove(identifier, identity)
-
-        return code
+        return self.remove(identifier, identity)
 
     def remove(self, uuid_or_id, identity=False):
         """Remove an identity from the registry.
