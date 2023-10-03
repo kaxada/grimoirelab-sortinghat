@@ -65,9 +65,9 @@ def merge_date_ranges(dates):
 
     for st, en in sorted_dates:
         if st < MIN_PERIOD_DATE or st > MAX_PERIOD_DATE:
-            raise ValueError("start date %s is out of bounds" % str(st))
+            raise ValueError(f"start date {str(st)} is out of bounds")
         if en < MIN_PERIOD_DATE or en > MAX_PERIOD_DATE:
-            raise ValueError("end date %s is out of bounds" % str(en))
+            raise ValueError(f"end date {str(en)} is out of bounds")
 
         if st == saved[0] and en == saved[1]:
             # skip when the saved range and (st, en) are equal.
@@ -166,6 +166,4 @@ def uuid(source, email=None, name=None, username=None):
                   to_unicode(username))).lower()
 
     sha1 = hashlib.sha1(s.encode('UTF-8', errors="surrogateescape"))
-    uuid_ = sha1.hexdigest()
-
-    return uuid_
+    return sha1.hexdigest()

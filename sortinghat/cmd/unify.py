@@ -82,8 +82,7 @@ class Unify(Command):
 
     @property
     def usage(self):
-        usg = "%(prog)s unify"
-        usg += " [--matching <matcher>] [--sources <srcs>]"
+        usg = "%(prog)s unify" + " [--matching <matcher>] [--sources <srcs>]"
         usg += " [--fast-matching] [--no-strict-matching] [--interactive] [--recovery]"
         return usg
 
@@ -92,11 +91,14 @@ class Unify(Command):
 
         params = self.parser.parse_args(args)
 
-        code = self.unify(params.matching, params.sources,
-                          params.fast_matching, params.no_strict,
-                          params.interactive, params.recovery)
-
-        return code
+        return self.unify(
+            params.matching,
+            params.sources,
+            params.fast_matching,
+            params.no_strict,
+            params.interactive,
+            params.recovery,
+        )
 
     def unify(self, matching=None, sources=None,
               fast_matching=False, no_strict_matching=False,
@@ -171,7 +173,7 @@ class Unify(Command):
         self.matched = 0
 
         if self.recovery and self.recovery_file.exists():
-            print("Loading matches from recovery file: %s" % self.recovery_file.location())
+            print(f"Loading matches from recovery file: {self.recovery_file.location()}")
             matched = self.recovery_file.load_matches()
         else:
             matched = match(uidentities, matcher, fastmode=fast_matching)
@@ -232,10 +234,7 @@ class Unify(Command):
             except EOFError:
                 return False
 
-        if answer in ['n', 'N']:
-            return False
-
-        return True
+        return answer not in ['n', 'N']
 
     def __display_stats(self):
         """Display some stats regarding unify process"""
@@ -281,7 +280,7 @@ class RecoveryFile:
     """
     def __init__(self, db_name, host, port):
         path = os.path.join(RECOVERY_FOLDER, self.__uuid(db_name, host, port))
-        self.recovery_path = os.path.expanduser(path + '.log')
+        self.recovery_path = os.path.expanduser(f'{path}.log')
 
     def location(self):
         """Return the recovery file path"""
@@ -303,7 +302,7 @@ class RecoveryFile:
 
         matches = []
         with open(self.location(), 'r') as f:
-            for line in f.readlines():
+            for line in f:
                 match_obj = json.loads(line.strip("\n"))
                 if match_obj['processed']:
                     continue
@@ -339,6 +338,4 @@ class RecoveryFile:
         s = '-'.join(args)
 
         sha1 = hashlib.sha1(s.encode('utf-8', errors='surrogateescape'))
-        uuid_sha1 = sha1.hexdigest()
-
-        return uuid_sha1
+        return sha1.hexdigest()

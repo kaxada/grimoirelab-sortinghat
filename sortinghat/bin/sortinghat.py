@@ -89,7 +89,7 @@ def main():
     args = parse_args()
 
     if args.command not in SORTINGHAT_COMMANDS:
-        raise RuntimeError("Unknown command %s" % args.command)
+        raise RuntimeError(f"Unknown command {args.command}")
 
     configure_logging(args.debug)
 
@@ -98,9 +98,7 @@ def main():
     cmd = klass(user=args.user, password=args.password,
                 database=args.database, host=args.host,
                 port=args.port, cmd_args=args.cmd_args)
-    code = cmd.run(*args.cmd_args)
-
-    return code
+    return cmd.run(*args.cmd_args)
 
 
 def parse_args():
@@ -144,10 +142,7 @@ def read_config_file(filepath):
     config = configparser.ConfigParser()
     config.read(filepath)
 
-    if 'db' in config.sections():
-        return dict(config.items('db'))
-    else:
-        return {}
+    return dict(config.items('db')) if 'db' in config.sections() else {}
 
 
 def create_common_arguments_parser(defaults):

@@ -57,8 +57,7 @@ class TestExportCaseBase(TestCommandCaseBase):
         with open(filename, 'r', encoding='UTF-8') as f:
             content = f.read()
 
-        obj = json.loads(content)
-        return obj
+        return json.loads(content)
 
     def load_test_dataset(self):
         # Add country

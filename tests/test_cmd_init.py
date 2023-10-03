@@ -51,8 +51,8 @@ class TestInitCaseBase(unittest.TestCase):
             self.fail('This test needs to be run in buffered mode')
 
         # Create temporal names for the registry
-        self.name = 'tmp' + uuid.uuid4().hex
-        self.name_reuse = 'tmp' + uuid.uuid4().hex
+        self.name = f'tmp{uuid.uuid4().hex}'
+        self.name_reuse = f'tmp{uuid.uuid4().hex}'
 
         config = configparser.ConfigParser()
         config.read(CONFIG_FILE)

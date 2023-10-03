@@ -180,7 +180,7 @@ def match(uidentities, matcher, fastmode=False):
         try:
             matcher.matching_criteria()
         except NotImplementedError:
-            name = "'%s (fast mode)'" % matcher.__class__.__name__.lower()
+            name = f"'{matcher.__class__.__name__.lower()} (fast mode)'"
             raise MatcherNotSupportedError(matcher=name)
 
     filtered, no_filtered, uuids = \
@@ -262,9 +262,7 @@ def _match_with_pandas(filtered, matcher):
     groups = result.groupby(by=['uuid_x'],
                             as_index=True, sort=True)
 
-    matched = _calculate_matches_closures(groups)
-
-    return matched
+    return _calculate_matches_closures(groups)
 
 
 def _filter_unique_identities(uidentities, matcher):
@@ -338,7 +336,7 @@ def _calculate_matches_closures(groups):
     while ns:
         n = ns.pop(0)
         visited = [n]
-        vs = [v for v in groups.get_group(n)['uuid_y']]
+        vs = list(groups.get_group(n)['uuid_y'])
 
         while vs:
             v = vs.pop(0)
@@ -346,7 +344,7 @@ def _calculate_matches_closures(groups):
             if v in visited:
                 continue
 
-            nvs = [nv for nv in groups.get_group(v)['uuid_y']]
+            nvs = list(groups.get_group(v)['uuid_y'])
             vs += nvs
             visited.append(v)
 

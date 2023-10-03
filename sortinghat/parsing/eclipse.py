@@ -59,13 +59,13 @@ class EclipseParser(object):
 
     @property
     def identities(self):
-        uids = [u for u in self._identities.values()]
+        uids = list(self._identities.values())
         uids.sort(key=lambda u: u.uuid)
         return uids
 
     @property
     def organizations(self):
-        orgs = [o for o in self._organizations.values()]
+        orgs = list(self._organizations.values())
         orgs.sort(key=lambda o: o.name)
         return orgs
 
@@ -143,7 +143,7 @@ class EclipseParser(object):
 
                 self._identities[uuid] = uid
         except KeyError as e:
-            msg = "invalid json format. Attribute %s not found" % e.args
+            msg = f"invalid json format. Attribute {e.args} not found"
             raise InvalidFormatError(cause=msg)
 
     def __parse_organizations(self, json):
@@ -189,11 +189,10 @@ class EclipseParser(object):
                     active = str_to_datetime(organization['active'])
                     inactive = str_to_datetime(organization['inactive'])
 
-                    # Ignore organization
-                    if not active and not inactive:
-                        continue
-
                     if not active:
+                        if not inactive:
+                            continue
+
                         active = MIN_PERIOD_DATE
                     if not inactive:
                         inactive = MAX_PERIOD_DATE
@@ -211,7 +210,7 @@ class EclipseParser(object):
 
                     self._organizations[name] = org
         except KeyError as e:
-            msg = "invalid json format. Attribute %s not found" % e.args
+            msg = f"invalid json format. Attribute {e.args} not found"
             raise InvalidFormatError(cause=msg)
 
     def __parse_affiliations_json(self, affiliations, uuid):
@@ -228,11 +227,10 @@ class EclipseParser(object):
             except InvalidDateError as e:
                 raise InvalidFormatError(cause=str(e))
 
-            # Ignore affiliation
-            if not start_date and not end_date:
-                continue
-
             if not start_date:
+                if not end_date:
+                    continue
+
                 start_date = MIN_PERIOD_DATE
             if not end_date:
                 end_date = MAX_PERIOD_DATE
@@ -241,8 +239,8 @@ class EclipseParser(object):
 
             # Set enrolllment period according to organization data
             if org:
-                start_date = org.active if start_date < org.active else start_date
-                end_date = org.inactive if end_date > org.inactive else end_date
+                start_date = max(start_date, org.active)
+                end_date = min(end_date, org.inactive)
 
             if not org:
                 org = Organization(name=name)
@@ -263,7 +261,7 @@ class EclipseParser(object):
         try:
             return json.loads(stream)
         except ValueError as e:
-            cause = "invalid json format. %s" % str(e)
+            cause = f"invalid json format. {str(e)}"
             raise InvalidFormatError(cause=cause)
 
     def __encode(self, s):

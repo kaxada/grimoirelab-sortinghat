@@ -101,7 +101,7 @@ class Domain(ModelBase):
         }
 
     def __repr__(self):
-        return "%s (%s)" % (self.domain, self.organization.name)
+        return f"{self.domain} ({self.organization.name})"
 
 
 class Country(ModelBase):
@@ -122,7 +122,7 @@ class Country(ModelBase):
         }
 
     def __repr__(self):
-        return "%s - %s" % (self.code, self.name)
+        return f"{self.code} - {self.name}"
 
 
 class UniqueIdentity(ModelBase):
@@ -225,7 +225,7 @@ class Profile(ModelBase):
         }
 
     def __repr__(self):
-        return "%s - %s (%s)" % (self.uuid, self.name, self.email)
+        return f"{self.uuid} - {self.name} ({self.email})"
 
 
 class Enrollment(ModelBase):
@@ -307,20 +307,17 @@ class MetricsGrimoireIdentity(MappedTable):
         super(MetricsGrimoireIdentity, self).__init__()
 
     def __eq__(self, other):
-        if isinstance(other, MetricsGrimoireIdentity) or\
-           isinstance(other, Identity):
+        if isinstance(other, (MetricsGrimoireIdentity, Identity)):
             return self.email == other.email \
-                and self.name == other.name \
-                and self.username == other.username
+                    and self.name == other.name \
+                    and self.username == other.username
         else:
             return NotImplemented
 
     def __ne__(self, other):
         result = self.__eq__(other)
 
-        if result is NotImplemented:
-            return result
-        return not result
+        return result if result is NotImplemented else not result
 
     @property
     def mg_id(self):

@@ -70,9 +70,7 @@ class Init(Command):
         """
         params = self.parser.parse_args(args)
 
-        code = self.initialize(name=params.name, reuse=params.reuse)
-
-        return code
+        return self.initialize(name=params.name, reuse=params.reuse)
 
     def initialize(self, name, reuse=False):
         """Create an empty Sorting Hat registry.
@@ -92,7 +90,7 @@ class Init(Command):
         port = self._kwargs['port']
 
         if '-' in name:
-            self.error("dabase name '%s' cannot contain '-' characters" % name)
+            self.error(f"dabase name '{name}' cannot contain '-' characters")
             return CODE_VALUE_ERROR
 
         try:

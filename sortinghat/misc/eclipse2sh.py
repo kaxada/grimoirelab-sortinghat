@@ -74,17 +74,13 @@ def parse_eclipse_file(infile, source):
 
     content = read_file(infile)
 
-    parser = EclipseParser(content, source=source)
-
-    return parser
+    return EclipseParser(content, source=source)
 
 
 def to_json(uidentities, organizations, source):
     """Convert unique identities and organizations to Sorting Hat JSON format"""
 
     uids = {}
-    orgs = {}
-
     # Convert to dict objects
     for uidentity in uidentities:
         uuid = uidentity.uuid
@@ -98,9 +94,7 @@ def to_json(uidentities, organizations, source):
 
         uids[uuid] = uid
 
-    for organization in organizations:
-        orgs[organization.name] = {}
-
+    orgs = {organization.name: {} for organization in organizations}
     # Generate JSON file
     obj = {'time': str(datetime.datetime.now()),
            'source': source,
@@ -122,8 +116,7 @@ def json_encoder(obj):
 
 
 def read_file(f):
-    content = f.read()
-    return content
+    return f.read()
 
 
 if __name__ == '__main__':

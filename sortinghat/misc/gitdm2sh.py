@@ -85,23 +85,16 @@ def parse_gitdm_files(aliases, email_to_employer,
                       domain_to_employer, source, email_validation):
     """Parse Gitdm files"""
 
-    a = None
-    ee = None
-    de = None
-
-    if aliases:
-        a = read_file(aliases)
-    if email_to_employer:
-        ee = read_file(email_to_employer)
-    if domain_to_employer:
-        de = read_file(domain_to_employer)
-
-    parser = GitdmParser(aliases=a,
-                         email_to_employer=ee,
-                         domain_to_employer=de,
-                         source=source,
-                         email_validation=email_validation)
-    return parser
+    a = read_file(aliases) if aliases else None
+    ee = read_file(email_to_employer) if email_to_employer else None
+    de = read_file(domain_to_employer) if domain_to_employer else None
+    return GitdmParser(
+        aliases=a,
+        email_to_employer=ee,
+        domain_to_employer=de,
+        source=source,
+        email_validation=email_validation,
+    )
 
 
 def to_json(uidentities, organizations, source):
@@ -152,8 +145,7 @@ def json_encoder(obj):
 
 
 def read_file(f):
-    content = f.read()
-    return content
+    return f.read()
 
 
 if __name__ == '__main__':

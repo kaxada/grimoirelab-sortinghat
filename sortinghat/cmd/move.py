@@ -74,9 +74,7 @@ class Move(Command):
         from_id = params.from_id
         to_uuid = params.to_uuid
 
-        code = self.move(from_id, to_uuid)
-
-        return code
+        return self.move(from_id, to_uuid)
 
     def move(self, from_id, to_uuid):
         """Move an identity into a unique identity.

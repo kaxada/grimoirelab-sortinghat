@@ -90,9 +90,7 @@ class Profile(Command):
         """Endit profile information."""
 
         uuid, kwargs = self.__parse_arguments(*args)
-        code = self.edit_profile(uuid, **kwargs)
-
-        return code
+        return self.edit_profile(uuid, **kwargs)
 
     def edit_profile(self, uuid, **kwargs):
         """Edit unique identity profile.

@@ -79,10 +79,7 @@ def parse_mailmap_file(infile, has_orgs, source):
 
     content = read_file(infile)
 
-    parser = MailmapParser(content, has_orgs=has_orgs,
-                           source=source)
-
-    return parser
+    return MailmapParser(content, has_orgs=has_orgs, source=source)
 
 
 def to_json(uidentities, organizations, source):
@@ -135,8 +132,7 @@ def json_encoder(obj):
 
 
 def read_file(f):
-    content = f.read()
-    return content
+    return f.read()
 
 
 if __name__ == '__main__':

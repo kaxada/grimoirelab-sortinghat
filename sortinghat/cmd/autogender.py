@@ -83,10 +83,7 @@ class AutoGender(Command):
         params = self.parser.parse_args(args)
         api_token = params.api_token
         genderize_all = params.genderize_all
-        code = self.autogender(api_token=api_token,
-                               genderize_all=genderize_all)
-
-        return code
+        return self.autogender(api_token=api_token, genderize_all=genderize_all)
 
     def autogender(self, api_token=None, genderize_all=False):
         """Autocomplete gender information of unique identities.
@@ -121,7 +118,7 @@ class AutoGender(Command):
                 except (requests.exceptions.RequestException,
                         requests.exceptions.RetryError) as e:
                     msg = "Skipping '%s' name (%s) due to a connection error. Error: %s"
-                    msg = msg % (firstname, profile.uuid, str(e))
+                    msg %= (firstname, profile.uuid, str(e))
                     self.warning(msg)
                     continue
 

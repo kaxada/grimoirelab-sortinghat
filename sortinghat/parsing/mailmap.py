@@ -67,13 +67,13 @@ class MailmapParser(object):
 
     @property
     def identities(self):
-        uids = [u for u in self._identities.values()]
+        uids = list(self._identities.values())
         uids.sort(key=lambda u: u.uuid)
         return uids
 
     @property
     def organizations(self):
-        orgs = [o for o in self._organizations.values()]
+        orgs = list(self._organizations.values())
         orgs.sort(key=lambda o: o.name)
         return orgs
 
@@ -163,9 +163,13 @@ class MailmapParser(object):
     def __parse_alias(self, alias, uuid=None):
         name = self.__encode(alias[0])
         email_addr = self.__encode(alias[1])
-        identity = Identity(name=name, email=email_addr, username=None,
-                            source=self.source, uuid=uuid)
-        return identity
+        return Identity(
+            name=name,
+            email=email_addr,
+            username=None,
+            source=self.source,
+            uuid=uuid,
+        )
 
     def __parse_stream(self, stream):
         """Generic method to parse mailmap streams"""
@@ -185,7 +189,7 @@ class MailmapParser(object):
             parts = line.split('>')
 
             if len(parts) == 0:
-                cause = "line %s: invalid format" % str(nline)
+                cause = f"line {nline}: invalid format"
                 raise InvalidFormatError(cause=cause)
 
             aliases = []
@@ -198,10 +202,10 @@ class MailmapParser(object):
                     continue
 
                 if part.find('<') < 0:
-                    cause = "line %s: invalid format" % str(nline)
+                    cause = f"line {nline}: invalid format"
                     raise InvalidFormatError(cause=cause)
 
-                alias = email.utils.parseaddr(part + '>')
+                alias = email.utils.parseaddr(f'{part}>')
                 aliases.append(alias)
 
             yield aliases

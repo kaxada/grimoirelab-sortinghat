@@ -74,9 +74,7 @@ def parse_stackalytics_file(infile, source):
 
     content = read_file(infile)
 
-    parser = StackalyticsParser(content, source=source)
-
-    return parser
+    return StackalyticsParser(content, source=source)
 
 
 def to_json(uidentities, organizations, source):
@@ -128,8 +126,7 @@ def json_encoder(obj):
 
 
 def read_file(f):
-    content = f.read()
-    return content
+    return f.read()
 
 
 if __name__ == '__main__':

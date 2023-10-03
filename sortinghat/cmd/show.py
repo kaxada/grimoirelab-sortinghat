@@ -76,9 +76,7 @@ class Show(Command):
 
         params = self.parser.parse_args(args)
 
-        code = self.show(params.uuid, params.term)
-
-        return code
+        return self.show(params.uuid, params.term)
 
     def show(self, uuid=None, term=None):
         """Show the information related to unique identities.

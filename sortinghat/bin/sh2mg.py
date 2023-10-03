@@ -180,8 +180,7 @@ def find_matches(sh_ids, mg_ids):
     for sh in sh_ids:
         for mg in mg_ids:
             if sh.id == mg.uuid:
-                m = {'uuid': sh.uuid, 'people_id': mg.id}
-                yield m
+                yield {'uuid': sh.uuid, 'people_id': mg.id}
 
 
 def load_mapping(engine, mapping):

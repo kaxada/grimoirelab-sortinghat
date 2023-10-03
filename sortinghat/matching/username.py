@@ -129,10 +129,7 @@ class UsernameMatcher(IdentityMatcher):
             return False
 
         # Compare username first
-        if fa.username and fa.username == fb.username:
-            return True
-
-        return False
+        return bool(fa.username and fa.username == fb.username)
 
     def filter(self, u):
         """Filter the valid identities for this matcher.

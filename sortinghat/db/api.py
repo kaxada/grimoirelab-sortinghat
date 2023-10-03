@@ -50,10 +50,11 @@ def find_unique_identity(session, uuid):
     :returns: a unique identity object; `None` when the unique
         identity does not exist
     """
-    uidentity = session.query(UniqueIdentity). \
-        filter(UniqueIdentity.uuid == uuid).first()
-
-    return uidentity
+    return (
+        session.query(UniqueIdentity)
+        .filter(UniqueIdentity.uuid == uuid)
+        .first()
+    )
 
 
 def find_identity(session, id_):
@@ -69,10 +70,7 @@ def find_identity(session, id_):
     :returns: an identity object; `None` when the identity
         does not exist
     """
-    identity = session.query(Identity). \
-        filter(Identity.id == id_).first()
-
-    return identity
+    return session.query(Identity).filter(Identity.id == id_).first()
 
 
 def find_organization(session, name):
@@ -88,10 +86,9 @@ def find_organization(session, name):
     :returns: an organization object; `None` when the organization
         does not exist
     """
-    organization = session.query(Organization). \
-        filter(Organization.name == name).first()
-
-    return organization
+    return (
+        session.query(Organization).filter(Organization.name == name).first()
+    )
 
 
 def find_domain(session, name):
@@ -127,10 +124,7 @@ def find_country(session, code):
     :return: a country object; `None` when the country
         does not exist
     """
-    country = session.query(Country).\
-        filter(Country.code == code).first()
-
-    return country
+    return session.query(Country).filter(Country.code == code).first()
 
 
 def add_unique_identity(session, uuid):
@@ -376,12 +370,11 @@ def enroll(session, uidentity, organization,
         raise ValueError("'to_date' cannot be None")
 
     if from_date < MIN_PERIOD_DATE or from_date > MAX_PERIOD_DATE:
-        raise ValueError("'from_date' %s is out of bounds" % str(from_date))
+        raise ValueError(f"'from_date' {str(from_date)} is out of bounds")
     if to_date < MIN_PERIOD_DATE or to_date > MAX_PERIOD_DATE:
-        raise ValueError("'to_date' %s is out of bounds" % str(to_date))
+        raise ValueError(f"'to_date' {str(to_date)} is out of bounds")
     if from_date > to_date:
-        raise ValueError("'from_date' %s cannot be greater than %s"
-                         % (from_date, to_date))
+        raise ValueError(f"'from_date' {from_date} cannot be greater than {to_date}")
 
     enrollment = Enrollment(uidentity=uidentity,
                             organization=organization,
@@ -424,12 +417,11 @@ def withdraw(session, uidentity, organization,
         raise ValueError("'to_date' cannot be None")
 
     if from_date < MIN_PERIOD_DATE or from_date > MAX_PERIOD_DATE:
-        raise ValueError("'from_date' %s is out of bounds" % str(from_date))
+        raise ValueError(f"'from_date' {str(from_date)} is out of bounds")
     if to_date < MIN_PERIOD_DATE or to_date > MAX_PERIOD_DATE:
-        raise ValueError("'to_date' %s is out of bounds" % str(to_date))
+        raise ValueError(f"'to_date' {str(to_date)} is out of bounds")
     if from_date > to_date:
-        raise ValueError("'from_date' %s cannot be greater than %s"
-                         % (from_date, to_date))
+        raise ValueError(f"'from_date' {from_date} cannot be greater than {to_date}")
 
     enrollments = session.query(Enrollment).\
         filter(Enrollment.uidentity == uidentity,
@@ -519,8 +511,9 @@ def edit_profile(session, uidentity, **kwargs):
             country = find_country(session, code)
 
             if not country:
-                raise ValueError("'country_code' (%s) does not match with a valid code"
-                                 % str(code))
+                raise ValueError(
+                    f"'country_code' ({str(code)}) does not match with a valid code"
+                )
 
             country_code = country.code
 

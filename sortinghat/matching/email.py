@@ -134,10 +134,7 @@ class EmailMatcher(IdentityMatcher):
             return False
 
         # Compare email addresses first
-        if fa.email and fa.email == fb.email:
-            return True
-
-        return False
+        return bool(fa.email and fa.email == fb.email)
 
     def filter(self, u):
         """Filter the valid identities for this matcher.
@@ -184,17 +181,7 @@ class EmailMatcher(IdentityMatcher):
         return ['email']
 
     def _check_blacklist(self, id_):
-        if not id_.email:
-            return False
-
-        blacklisted = id_.email.lower() in self.blacklist
-
-        return blacklisted
+        return False if not id_.email else id_.email.lower() in self.blacklist
 
     def _check_email(self, email):
-        if not email:
-            return False
-
-        checked = self.email_pattern.match(email) is not None
-
-        return checked
+        return False if not email else self.email_pattern.match(email) is not None

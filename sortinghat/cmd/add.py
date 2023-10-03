@@ -100,10 +100,15 @@ class Add(Command):
 
         params = self.parser.parse_args(args)
 
-        code = self.add(params.source, params.email, params.name, params.username,
-                        params.uuid, params.matching, params.interactive)
-
-        return code
+        return self.add(
+            params.source,
+            params.email,
+            params.name,
+            params.username,
+            params.uuid,
+            params.matching,
+            params.interactive,
+        )
 
     def add(self, source, email=None, name=None, username=None, uuid=None,
             matching=None, interactive=False):
@@ -154,7 +159,7 @@ class Add(Command):
             if matcher:
                 self.__merge_on_matching(uuid, matcher, interactive)
         except AlreadyExistsError as e:
-            msg = "unique identity '%s' already exists in the registry" % e.eid
+            msg = f"unique identity '{e.eid}' already exists in the registry"
             self.error(msg)
             return e.code
         except (NotFoundError, InvalidValueError) as e:
@@ -172,24 +177,15 @@ class Add(Command):
             if m.uuid == uuid:
                 continue
 
-            merged = self.__merge(u, m, interactive)
-
-            if not merged:
-                continue
-
-            # Swap uids to merge with those that could
-            # remain on the list with updated info
-            u = api.unique_identities(self.db, m.uuid)[0]
+            if merged := self.__merge(u, m, interactive):
+                # Swap uids to merge with those that could
+                # remain on the list with updated info
+                u = api.unique_identities(self.db, m.uuid)[0]
 
     def __merge(self, uid, match, interactive):
         self.display('match.tmpl', uid=uid, match=match)
 
-        # By default, always merge
-        merge = True
-
-        if interactive:
-            merge = self.__read_verification()
-
+        merge = self.__read_verification() if interactive else True
         if not merge:
             return False
 
@@ -208,7 +204,4 @@ class Add(Command):
             except EOFError:
                 return False
 
-        if answer in ['n', 'N']:
-            return False
-
-        return True
+        return answer not in ['n', 'N']

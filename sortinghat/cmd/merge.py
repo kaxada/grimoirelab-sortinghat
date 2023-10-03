@@ -76,9 +76,7 @@ class Merge(Command):
         from_uuid = params.from_uuid
         to_uuid = params.to_uuid
 
-        code = self.merge(from_uuid, to_uuid)
-
-        return code
+        return self.merge(from_uuid, to_uuid)
 
     def merge(self, from_uuid, to_uuid):
         """Merge one unique identity into another.
